@@ -1,4 +1,4 @@
-<title>Admin - COS ePoster Submission Site</title>
+<title>Admin - COS Exhibitor Graphics Site</title>
 
 <main role="main" style="margin-top: 70px;margin-left: 20px;margin-right: 20px;">
     <div class="row">
