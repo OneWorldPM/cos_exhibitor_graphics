@@ -34,7 +34,7 @@
 <body>
 
 <nav class="navbar navbar-expand-md navbar-dark bg-dark">
-    <a class="navbar-brand" href="#"><img src="<?=base_url('upload_system_files/vendor/images/ycl_Icon.png')?>" width="40px"> COS FUS | Admin Panel</a>
+    <a class="navbar-brand" href="#"><img src="<?=base_url('upload_system_files/vendor/images/ycl_Icon.png')?>" width="40px"> COS Exhibitor Graphics | Admin Panel</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
