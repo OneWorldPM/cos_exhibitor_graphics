@@ -25,10 +25,12 @@ class Presenter_model extends CI_Model
         $email= $post['email'];
         $password= $post['password'];
         $presenter_id= $post['presenter_id'];
+        $name_prefix= $post['name_prefix'];
         $date_updated = date('Y-m-d h:i:s');
 
 //        print_r($post);exit;
         $set_field=array(
+            'name_prefix'=>$name_prefix,
             'first_name'=>$first_name,
             'last_name'=>$last_name,
             'email'=>$email,
