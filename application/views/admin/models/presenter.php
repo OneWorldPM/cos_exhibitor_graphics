@@ -1,4 +1,9 @@
-<!-- Load Presentation Modal -->
+<!-- Load Presenter Modal -->
+<style>
+  .input-group-text{
+      width:200px;
+  }
+</style>
 <div class="modal fade" id="modalEditPresenter" tabindex="-1" role="dialog" aria-labelledby="loadPresentationsModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -16,7 +21,7 @@
                     </div>
                     <div class="form-group">
                         <div class="input-group-prepend">
-                            <div class="input-group-text ">Name Prefix</div>
+                            <div class="input-group-text">Name Prefix</div>
                             <input  type="text" name="name_prefix" class="form-control  modal-name_prefix" value="">
                         </div>
                     </div>
