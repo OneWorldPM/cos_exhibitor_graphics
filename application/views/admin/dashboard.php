@@ -142,7 +142,7 @@
                     '  <td>'+presenterBooth.id+'</td>\n' +
                     '  <td>'+presenterBooth.name+'</td>\n' +
                     '  <td>'+presenterBooth.name_prefix+'</td>\n' +
-                    '  <td>'+presenterBooth.first_name+presenterBooth.last_name+'</td>\n' +
+                    '  <td>'+presenterBooth.first_name+' '+presenterBooth.last_name+'</td>\n' +
                     '  <td>'+presenterBooth.email+'</td>\n' +
                     '  <td>'+presenterBooth.style+'</td>\n' +
                     '  <td>\n' +
