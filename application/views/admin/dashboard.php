@@ -3,8 +3,8 @@
 <main role="main" style="margin-top: 70px;margin-left: 20px;margin-right: 20px;">
     <div class="row">
         <div class="col-md-12">
-            <h3>Presentations</h3>
-            <p>Loaded presentations are listed here</p>
+            <h3>Booths</h3>
+            <p>Loaded Booths are listed here</p>
 
             <div id="lastUpdatedAlert" class="alert alert-warning alert-dismissible fade show" role="alert" style="display:none;">
                 This list was last loaded on <strong><span id="lastUpdated"></span></strong>
