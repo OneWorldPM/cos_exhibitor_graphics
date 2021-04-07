@@ -8,7 +8,7 @@
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="loadPresentationsModalLabel">Edit Presenter Details</h5>
+                <h5 class="modal-title" id="loadPresentationsModalLabel">Edit Account Details</h5>
             </div>
             <div class="modal-body">
 
