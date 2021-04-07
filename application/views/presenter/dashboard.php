@@ -42,12 +42,12 @@
 <main role="main" style="margin-top: 70px;margin-left: 20px;margin-right: 20px;">
     <div class="row">
         <div class="col-md-12">
-            <h3><i class="fas fa-chalkboard-teacher"></i> Your Presentations</h3>
-            <p>Your presentations are listed here; you can upload your files using the <!--<button id="example-upload-btn" class="btn btn-sm btn-info"><i class="fas fa-upload"></i> Upload</button>-->upload button.</p>
+            <h3><i class="fas fa-chalkboard-teacher"></i> Your Booths</h3>
+            <p>Your booths are listed here; you can upload your files using the <!--<button id="example-upload-btn" class="btn btn-sm btn-info"><i class="fas fa-upload"></i> Upload</button>-->upload button.</p>
             <p>You may upload the following file types:  Microsoft PowerPoint (.ppt, .pptx), Video Files (.mp4, .mp3, .mv4, .mpg)</p>
 
             <div id="lastUpdatedAlert" class="alert alert-warning alert-dismissible fade show" role="alert" style="display:none;">
-                Presentations list was last loaded on <strong><span id="lastUpdated"></span></strong> by admin
+                Booths list was last loaded on <strong><span id="lastUpdated"></span></strong> by admin
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>

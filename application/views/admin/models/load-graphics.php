@@ -3,7 +3,7 @@
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="loadPresentationsModalLabel">Load Presentations</h5>
+                <h5 class="modal-title" id="loadPresentationsModalLabel">Load Booths</h5>
             </div>
             <div class="modal-body">
 
@@ -105,7 +105,7 @@
                                 $("#inputPresentationsFile").val('').clone(true);
                                 $('.custom-file-label').html('Please select the file');
                                 $('#loadPresentationsModal').modal('hide');
-                                loadPresentations();
+                                loadPresenterBooths();
 
                                 Swal.fire(
                                     'Done!',
