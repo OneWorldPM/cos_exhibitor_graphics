@@ -32,7 +32,7 @@
                     <div id="dropzone">
                         <!-- Form will be filled here dynamically by Dropzone -->
                     </div>
-                    <small style="color: red;">You may upload the following file types: Microsoft PowerPoint (.ppt, .pptx), Video Files (.mp4, .mp3, .mv4, .mpg) Image Files (.jpg, .png, .gif)</small>
+                    <small style="color: red;">You may upload the following file types: Microsoft PowerPoint (.ppt, .pptx), Video Files (.mp4, .mp3, .mv4, .mpg, .mov) Image Files (.jpg, .png, .gif)</small>
                 </section>
 
                 <section class="mt-3" id="existingFilesSection">
