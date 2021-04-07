@@ -18,13 +18,13 @@
 
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
-                        <li class="breadcrumb-item active" aria-current="page">Category: <span id="sessionName"></span></li>
+                        <li class="breadcrumb-item active" aria-current="page">Company: <span id="company-name"></span></li>
                     </ol>
                 </nav>
 
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
-                        <li class="breadcrumb-item active" aria-current="page">Presentation: <span id="presentationName"></span></li>
+                        <li class="breadcrumb-item active" aria-current="page">Booth Style: <span id="booth-style"></span></li>
                     </ol>
                 </nav>
 
@@ -58,12 +58,12 @@
     });
 
 
-    function showFiles(user_id, presentation_id, session_name, presentation_name)
+    function showFiles(user_id, booth_id, company_id, company_name, booth_style)
     {
-        fillUploadedFiles(user_id, presentation_id);
+        fillUploadedFiles(user_id, booth_id, company_id);
 
-        $('#sessionName').text(session_name);
-        $('#presentationName').text(presentation_name);
+        $('#company-name').text(company_name);
+        $('#booth-style').text(booth_style);
 
 
         $('#filesModal').modal({ //Should not auto-close
@@ -72,12 +72,12 @@
         });
     }
 
-    function fillUploadedFiles(user_id, presentation_id) {
+    function fillUploadedFiles(user_id, booth_id, company_id) {
         $('#uploadedFiles').html('<img src="<?=base_url('upload_system_files/vendor/images/ycl_anime_500kb.gif')?>">');
 
-        $.get( "<?=base_url('admin/dashboard/getUploadedFiles/')?>"+user_id+"/"+presentation_id, function(response) {
+        $.get( "<?=base_url('admin/dashboard/getUploadedFiles/')?>"+user_id+"/"+booth_id+"/"+company_id, function(response) {
             response = JSON.parse(response);
-
+            console.log(response);
             if (response.status == 'success')
             {
                 $('#uploadedFiles').html('');
@@ -89,7 +89,7 @@
                         '<li class="list-group-item">' +
                         '<a href="<?=base_url('admin/dashboard/openFile/')?>'+file.id+'" target="_blank"><button class="btn btn-sm btn-info mr-3"><i class="fas fa-save"></i> Download</button></a>' +
                         '<span class="uploaded-file-names badge badge-success"><i class="fas fa-clipboard-check"></i> '+file.name+' <span class="badge badge-info">'+Math.ceil(file.size/1000)+' kb</span></span>' +
-                        '<!--<button class="delete-file-btn btn btn-sm btn-danger ml-3" presentation-id="'+file.presentation_id+'" user-id="'+file.presenter_id+'" file-id="'+file.id+'" file-name="'+file.name+'"><i class="fas fa-trash"></i> Delete</button>-->' +
+                        '<!--<button class="delete-file-btn btn btn-sm btn-danger ml-3" company-id="'+file.company_id+'" booth-id="'+file.booth_id+'" user-id="'+file.presenter_id+'" file-id="'+file.id+'" file-name="'+file.name+'"><i class="fas fa-trash"></i> Delete</button>-->' +
                         '</li>');
                 });
                 $('#uploadedFiles').append('</ul>');
@@ -111,7 +111,8 @@
         let file_id = $(this).attr('file-id');
         let file_name = $(this).attr('file-name');
         let user_id = $(this).attr('user-id');
-        let presentation_id = $(this).attr('presentation-id');
+        let booth_id = $(this).attr('booth_id');
+        let company_id = $(this).attr('company_id');
 
         Swal.fire({
             title: 'Are you sure?',
@@ -127,8 +128,9 @@
                 $.post( "<?=base_url('dashboard/deleteFile')?>",
                     {
                         user_id: user_id,
-                        presentation_id: presentation_id,
-                        file_id: file_id
+                        booth_id: booth_id,
+                        file_id: file_id,
+                        company_id: company_id,
                     })
                     .done(function( data ) {
 
@@ -143,7 +145,7 @@
                                 'success'
                             );
 
-                            fillUploadedFiles(user_id, presentation_id);
+                            fillUploadedFiles(user_id, presentation_id, booth_id, company_id);
 
                         }else{
                             Swal.fire(

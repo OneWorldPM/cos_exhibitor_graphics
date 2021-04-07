@@ -18,13 +18,13 @@
 
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
-                        <li class="breadcrumb-item active" aria-current="page">Category: <span id="sessionName"></span></li>
+                        <li class="breadcrumb-item active" aria-current="page">Company Name: <span id="company-name"></span></li>
                     </ol>
                 </nav>
 
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
-                        <li class="breadcrumb-item active" aria-current="page">Presentation: <span id="presentationName"></span></li>
+                        <li class="breadcrumb-item active" aria-current="page">Booth Style: <span id="booth-style"></span></li>
                     </ol>
                 </nav>
 
@@ -127,7 +127,7 @@
                         deletedFilesNo=0;
                     });
 
-                loadPresentations();
+                loadBooth();
 
             }
             else
@@ -140,12 +140,14 @@
     });
 
 
-    function showUploader(user_id, presentation_id, session_name, presentation_name)
+    function showUploader(user_id, company_id, booth_id, company_name, booth_style)
     {
-        fillUploadedFiles(user_id, presentation_id);
+        fillUploadedFiles(user_id, booth_id, company_id);
 
-        $('#sessionName').text(session_name);
-        $('#presentationName').text(presentation_name);
+        $('#booth-style').text(booth_style);
+        $('#company-name').text(company_name);
+
+
 
         let form = '' +
             '<form method="post" class="dropzone">' +
@@ -172,7 +174,8 @@
 
         uploadDropzone.on('sending', function(file, xhr, formData){
             formData.append('user_id', user_id);
-            formData.append('presentation_id', presentation_id);
+            formData.append('booth_id', booth_id);
+            formData.append('company_id', company_id);
         });
 
         uploadDropzone.on('success', function() {
@@ -187,7 +190,7 @@
 
             if (response.status == 'success')
             {
-                fillUploadedFiles(user_id, presentation_id);
+                fillUploadedFiles(user_id, booth_id, company_id);
                 _this.removeFile(file);
                 uploadedFilesNo = uploadedFilesNo+1;
             }else{
@@ -214,10 +217,10 @@
         });
     }
 
-    function fillUploadedFiles(user_id, presentation_id) {
+    function fillUploadedFiles(user_id, booth_id, company_id) {
         $('#uploadedFiles').html('<img src="<?=base_url('upload_system_files/vendor/images/ycl_anime_500kb.gif')?>">');
 
-        $.get( "<?=base_url('dashboard/getUploadedFiles/')?>"+user_id+"/"+presentation_id, function(response) {
+        $.get( "<?=base_url('dashboard/getUploadedFiles/')?>"+user_id+"/"+booth_id+"/"+company_id, function(response) {
             response = JSON.parse(response);
 
             if (response.status == 'success')
@@ -225,11 +228,12 @@
                 $('#uploadedFiles').html('');
                 $('#uploadedFiles').append('<ul class="list-group">');
                 $.each(response.files, function(i, file) {
+                    console.log(file);
                     $('#uploadedFiles').append('' +
                         '<li class="list-group-item">' +
                         '<a href="<?=base_url('dashboard/openFile/')?>'+file.id+'" target="_blank"><button class="btn btn-sm btn-info mr-3"><i class="fas fa-save"></i> Download</button></a>' +
                         '<span class="uploaded-file-names badge badge-success"><i class="fas fa-clipboard-check"></i> '+file.name+' <span class="badge badge-info">'+Math.ceil(file.size/1000)+' kb</span></span>' +
-                        '<button class="delete-file-btn btn btn-sm btn-danger ml-3" presentation-id="'+file.presentation_id+'" user-id="'+file.presenter_id+'" file-id="'+file.id+'" file-name="'+file.name+'"><i class="fas fa-trash"></i> Delete</button>' +
+                        '<button class="delete-file-btn btn btn-sm btn-danger ml-3" booth-id="'+file.booth_id+'" company-id = "'+file.company_id+'" user-id="'+file.presenter_id+'" file-id="'+file.id+'" file-name="'+file.name+'"><i class="fas fa-trash"></i> Delete</button>' +
                         '</li>');
                 });
                 $('#uploadedFiles').append('</ul>');
@@ -251,8 +255,10 @@
         let file_id = $(this).attr('file-id');
         let file_name = $(this).attr('file-name');
         let user_id = $(this).attr('user-id');
-        let presentation_id = $(this).attr('presentation-id');
-
+        let booth_id = $(this).attr('booth-id');
+        let company_id = $(this).attr('company-id');
+        console.log(booth_id);
+        console.log(company_id);
         Swal.fire({
             title: 'Are you sure?',
             text: "You are you about to delete "+file_name,
@@ -267,8 +273,9 @@
                 $.post( "<?=base_url('dashboard/deleteFile')?>",
                     {
                         user_id: user_id,
-                        presentation_id: presentation_id,
-                        file_id: file_id
+                        booth_id: booth_id,
+                        file_id: file_id,
+                        company_id:company_id,
                     })
                     .done(function( data ) {
 
@@ -283,7 +290,7 @@
                                 'success'
                             );
 
-                            fillUploadedFiles(user_id, presentation_id);
+                            fillUploadedFiles(user_id, booth_id, company_id);
 
                         }else{
                             Swal.fire(

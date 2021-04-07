@@ -22,16 +22,17 @@
                 <tr>
                     <th>Status</th>
                     <th>ID</th>
-                    <th>Category</th>
-                    <th>Presentation Title</th>
-                    <th>Presenter</th>
-                    <th>Award</th>
+                    <th>Company</th>
+                    <th>Salutation</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Booth Style</th>
                     <th>Info</th>
                     <th>Actions</th>
                 </tr>
                 </thead>
 
-                <tbody id="presentationTableBody">
+                <tbody id="presenterBoothTableBody">
                 <!-- Will be filled by JQuery AJAX -->
                 </tbody>
 
@@ -51,7 +52,7 @@
 <script>
     $(document).ready(function() {
 
-        loadPresentations();
+        loadPresenterBooths();
 
         $('#example-upload-btn').on('click', function () {
             toastr.warning('You need to click one of the similar buttons listed below to upload files.');
@@ -61,45 +62,49 @@
             $('#changePasswordModal').modal('show');
         });
 
-        $('#presentationTable').on('click', '.files-btn', function () {
+        $('#presenterBoothTableBody').on('click', '.files-btn', function () {
+
+            let presenter_id = $(this).attr('presenter-id');
+            let booth_id = $(this).attr('booth-id');
+            let company_id = $(this).attr('company-id');
+            let company_name = $(this).attr('company-name');
+            let booth_style = $(this).attr('booth-style');
+
+            showFiles(presenter_id, booth_id, company_id, company_name, booth_style);
+        });
+
+        $('#presenterBoothTableBody').on('click', '.details-btn', function () {
 
             let user_id = $(this).attr('user-id');
-            let presentation_id = $(this).attr('presentation-id');
-            let presentation_name = $(this).attr('presentation-name');
-            let session_name = $(this).attr('session-name');
+            let booth_id = $(this).attr('booth-id');
+            let company_id = $(this).attr('company-id');
 
-            showFiles(user_id, presentation_id, session_name, presentation_name);
+            showFiles(user_id, booth_id, company_id);
         });
 
-        $('#presentationTable').on('click', '.details-btn', function () {
-
-            let user_id = $(this).attr('user-id');
-            let presentation_id = $(this).attr('presentation-id');
-            let presentation_name = $(this).attr('presentation-name');
-            let session_name = $(this).attr('session-name');
-
-            showUploader(user_id, presentation_id, session_name, presentation_name);
-        });
-
-        $('#presentationTable').on('click', '.activate-presentation-btn', function () {
+        $('#presenterBoothTableBody').on('click', '.activate-presentation-btn', function () {
             let button = $(this);
-            let presentationId = $(this).attr('presentation-id');
+            let booth_id = $(this).attr('booth-id');
+            let company_id = $(this).attr('company-id');
+            let presenter_id = $(this).attr('presenter-id');
 
-            activatePresentation(presentationId, button);
+            activatePresentation(button, booth_id, company_id, presenter_id);
         });
 
-        $('#presentationTable').on('click', '.disable-presentation-btn', function () {
+        $('#presenterBoothTableBody').on('click', '.disable-presentation-btn', function () {
             let button = $(this);
-            let presentationId = $(this).attr('presentation-id');
+            let booth_id = $(this).attr('booth-id');
+            let company_id = $(this).attr('company-id');
+            let presenter_id = $(this).attr('presenter-id');
 
-            disablePresentation(presentationId, button);
+            disablePresentation(button, booth_id, company_id, presenter_id);
         });
 
-        $('#presentationTable').on('click', '.presentation-logs-btn', function () {
+        $('#presenterBoothTableBody').on('click', '.presentation-logs-btn', function () {
             toastr.warning("Under development");
         });
 
-        $('#presentationTable').on('click', '.edit-presentation-btn', function () {
+        $('#presenterBoothTableBody').on('click', '.edit-presentation-btn', function () {
             toastr.warning("Under development");
         });
 
@@ -109,42 +114,37 @@
 
     } );
 
-
-
-    function loadPresentations() {
-        $.get( "<?=base_url('admin/dashboard/getPresentationList')?>", function(response) {
+    function loadPresenterBooths() {
+        $.get( "<?=base_url('admin/dashboard/getPresentersBooth')?>", function(response) {
             response = JSON.parse(response);
-
-            if ( $.fn.DataTable.isDataTable('#presentationTable') ) {
-                $('#presentationTable').DataTable().destroy();
+            console.log(response);
+            if ( $.fn.DataTable.isDataTable('#presenterBoothTable') ) {
+                $('#presenterBoothTable').DataTable().destroy();
             }
 
-            $('#presentationTableBody').html('');
-            $.each(response.data, function(i, presentation) {
+            $('#presenterBoothTableBody').html('');
+            $.each(response.data, function(i, presenterBooth) {
 
-                let statusBadge = (presentation.uploadStatus)?'<span class="badge badge-success mr-1"><i class="fas fa-check-circle"></i> '+presentation.uploadStatus+' File(s) uploaded</span>':'<span class="badge badge-warning mr-1"><i class="fas fa-exclamation-circle"></i> No Uploads</span>';
-                statusBadge += (presentation.active==1)?'<span class="active-status badge badge-success" presentation-id="'+presentation.id+'"><i class="fas fa-check"></i> Active</span>':'<span class="disabled-status badge badge-danger" presentation-id="'+presentation.id+'"><i class="fas fa-times"></i> Disabled</span>';
+                let statusBadge = (presenterBooth.uploadStatus)?'<span class="badge badge-success mr-1"><i class="fas fa-check-circle"></i> '+presenterBooth.uploadStatus+' File(s) uploaded</span>':'<span class="badge badge-warning mr-1"><i class="fas fa-exclamation-circle"></i> No Uploads</span>';
+                statusBadge += (presenterBooth.active==1)?'<span class="active-status badge badge-success" presentation-id="'+presenterBooth.id+'"><i class="fas fa-check"></i> Active</span>':'<span class="disabled-status badge badge-danger" presentation-id="'+presenterBooth.id+'"><i class="fas fa-times"></i> Disabled</span>';
 
-                let filesBtn = '<button class="files-btn btn btn-sm btn-info text-white" session-name="'+presentation.session_name+'" presentation-name="'+presentation.name+'" user-id="'+presentation.presenter_id+'" presentation-id="'+presentation.id+'"><i class="fas fa-folder-open"></i> Files</button>';
-                let logsBtn = '<button class="presentation-logs-btn btn btn-sm btn-warning text-white mt-1" session-name="'+presentation.session_name+'" presentation-name="'+presentation.name+'" user-id="<?=$this->session->userdata('user_id')?>" presentation-id="'+presentation.id+'"><i class="fas fa-history"></i> Logs</button>';
+                let filesBtn = '<button class="files-btn btn btn-sm btn-info text-white"  presenter-id="'+presenterBooth.presenter_id+'" company-name="'+presenterBooth.name+'" company-id="'+presenterBooth.company_id+'" booth-id="'+presenterBooth.id+'"  booth-style="'+presenterBooth.style+'"  user-id="<?=$this->session->userdata('user_id')?>"><i class="fas fa-folder-open"></i> Files</button>';
+                let logsBtn = '<button class="presentation-logs-btn btn btn-sm btn-warning text-white mt-1" session-name="'+presenterBooth.session_name+'" presentation-name="'+presenterBooth.name+'" user-id="<?=$this->session->userdata('user_id')?>" presentation-id="'+presenterBooth.id+'"><i class="fas fa-history"></i> Logs</button>';
 
                 let editBtn = '<button class="edit-presentation-btn btn btn-sm btn-primary text-white"><i class="fas fa-edit"></i> Edit</button>';
-                let disableBtn = (presentation.active==0)?'<button class="activate-presentation-btn btn btn-sm btn-success text-white mt-1" presentation-id="'+presentation.id+'"><i class="fas fa-check"></i> Activate</button>':'<button class="disable-presentation-btn btn btn-sm btn-danger text-white mt-1" presentation-id="'+presentation.id+'"><i class="fas fa-times"></i> Disable</button>';
+                let disableBtn = (presenterBooth.active==0)?'<button class="activate-presentation-btn btn btn-sm btn-success text-white mt-1" booth-id="'+presenterBooth.id+'" company-id="'+presenterBooth.company_id+'" presenter-id="'+presenterBooth.presenter_id+'"><i class="fas fa-check"></i> Activate</button>':'<button class="disable-presentation-btn btn btn-sm btn-danger text-white mt-1" booth-id="'+presenterBooth.id+'" company-id="'+presenterBooth.company_id+'" presenter-id="'+presenterBooth.presenter_id+'"><i class="fas fa-times"></i> Disable</button>';
 
-                var award = presentation.award;
-                if(award == null){
-                    award="";
-                }
-                $('#presentationTableBody').append('' +
+                $('#presenterBoothTableBody').append('' +
                     '<tr>\n' +
                     '  <td>\n' +
-                    '    '+statusBadge+'\n' +
+                    '    '+statusBadge+'\n'     +
                     '  </td>\n' +
-                    '  <td>'+presentation.id+'</td>\n' +
-                    '  <td>'+presentation.session_name+'</td>\n' +
-                    '  <td>'+presentation.name+'</td>\n' +
-                    '  <td>'+presentation.presenter_name+'</td>\n' +
-                    '  <td>'+award+'</td>\n' +
+                    '  <td>'+presenterBooth.id+'</td>\n' +
+                    '  <td>'+presenterBooth.name+'</td>\n' +
+                    '  <td>'+presenterBooth.name_prefix+'</td>\n' +
+                    '  <td>'+presenterBooth.first_name+presenterBooth.last_name+'</td>\n' +
+                    '  <td>'+presenterBooth.email+'</td>\n' +
+                    '  <td>'+presenterBooth.style+'</td>\n' +
                     '  <td>\n' +
                     '    '+filesBtn+'\n' +
                     '    '+logsBtn+'\n' +
@@ -156,7 +156,7 @@
                     '</tr>');
             });
 
-            $('#presentationTable').DataTable({
+            $('#presenterBoothTable').DataTable({
                 initComplete: function() {
                     $(this.api().table().container()).find('input').attr('autocomplete', 'off');
                     $(this.api().table().container()).find('input').attr('type', 'text');
@@ -184,17 +184,17 @@
         return ((include_year)?year+' ':'')+month+', '+day+'th '+time;
     }
 
-    function activatePresentation(presentation_id, button) {
-        $.get( "<?=base_url('admin/dashboard/activatePresentation/')?>"+presentation_id, function(response) {
+    function activatePresentation(button, booth_id, company_id, presenter_id) {
+        $.get( "<?=base_url('admin/dashboard/activatePresentation/')?>"+booth_id+"/"+company_id+"/"+presenter_id, function(response) {
             response = JSON.parse(response);
 
             if (response.status == 'success')
             {
-                $('.disabled-status[presentation-id="'+presentation_id+'"]').html('<i class="fas fa-check"></i> Active');
-                $('.disabled-status[presentation-id="'+presentation_id+'"]').removeClass('badge-danger');
-                $('.disabled-status[presentation-id="'+presentation_id+'"]').addClass('badge-success');
-                $('.disabled-status[presentation-id="'+presentation_id+'"]').addClass('active-status');
-                $('.disabled-status[presentation-id="'+presentation_id+'"]').removeClass('disabled-status');
+                $('.disabled-status[booth-id="'+booth_id+'"]').html('<i class="fas fa-check"></i> Active');
+                $('.disabled-status[booth-id="'+booth_id+'"]').removeClass('badge-danger');
+                $('.disabled-status[booth-id="'+booth_id+'"]').addClass('badge-success');
+                $('.disabled-status[booth-id="'+booth_id+'"]').addClass('active-status');
+                $('.disabled-status[booth-id="'+booth_id+'"]').removeClass('disabled-status');
 
                 button.removeClass('activate-presentation-btn');
                 button.addClass('disable-presentation-btn');
@@ -212,17 +212,17 @@
         })
     }
 
-    function disablePresentation(presentation_id, button) {
-        $.get( "<?=base_url('admin/dashboard/disablePresentation/')?>"+presentation_id, function(response) {
+    function disablePresentation(button, booth_id, company_id, presenter_id) {
+        $.get( "<?=base_url('admin/dashboard/disablePresentation/')?>"+booth_id+"/"+company_id+"/"+presenter_id, function(response) {
             response = JSON.parse(response);
 
             if (response.status == 'success')
             {
-                $('.active-status[presentation-id="'+presentation_id+'"]').html('<i class="fas fa-times"></i> Disabled');
-                $('.active-status[presentation-id="'+presentation_id+'"]').removeClass('badge-success');
-                $('.active-status[presentation-id="'+presentation_id+'"]').addClass('badge-danger');
-                $('.active-status[presentation-id="'+presentation_id+'"]').addClass('disabled-status');
-                $('.active-status[presentation-id="'+presentation_id+'"]').removeClass('active-status');
+                $('.active-status[booth-id="'+booth_id+'"]').html('<i class="fas fa-times"></i> Disabled');
+                $('.active-status[booth-id="'+booth_id+'"]').removeClass('badge-success');
+                $('.active-status[booth-id="'+booth_id+'"]').addClass('badge-danger');
+                $('.active-status[booth-id="'+booth_id+'"]').addClass('disabled-status');
+                $('.active-status[booth-id="'+booth_id+'"]').removeClass('active-status');
 
                 button.removeClass('disable-presentation-btn');
                 button.addClass('activate-presentation-btn');

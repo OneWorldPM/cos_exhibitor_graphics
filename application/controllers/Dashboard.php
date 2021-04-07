@@ -26,18 +26,20 @@ class Dashboard extends CI_Controller
         $this->load->view('presenter/foot');
     }
 
-    public function getPresentationList()
+    public function getPresentersBooth()
     {
         $user_id = $this->session->userdata('user_id');
 
-        $this->db->select('p.*, s.name as session_name');
-        $this->db->from('presentations p');
-        $this->db->join('sessions s', 's.id = p.session_id');
-        $this->db->where("p.presenter_id ", $user_id);
-        $this->db->where("p.active ", 1);
-        $this->db->order_by('p.created_on', 'DESC');
+        $this->db->select("b.*, p.presenter_id, c.name");
+        $this->db->from('booth b');
+        $this->db->join('companies c', 'c.id=b.company_id');
+        $this->db->join('presenter p', 'c.contact_person_id=p.presenter_id');
+        $this->db->where('p.presenter_id=',$user_id);
+        $this->db->where("b.active ", 1);
+//        $this->db->order_by('b.created_on', 'DESC');
         $result = $this->db->get();
-
+//        echo "<pre>";
+//        print_r($result->result());exit;
         if ($result->num_rows() > 0)
         {
             foreach ($result->result() as $row)
@@ -46,7 +48,7 @@ class Dashboard extends CI_Controller
             echo json_encode(array('status'=>'success', 'data'=>$result->result()));
             return;
         } else {
-            echo json_encode(array('status'=>'error', 'msg'=>'Unable to load your presentations data'));
+            echo json_encode(array('status'=>'error', 'msg'=>'Unable to load your presenter booth data'));
             return;
         }
     }
@@ -75,7 +77,8 @@ class Dashboard extends CI_Controller
         }
 
         $user = $this->input->post()['user_id'];
-        $presentation_id = $this->input->post()['presentation_id'];
+        $company_id = $this->input->post()['company_id'];
+        $booth_id = $this->input->post()['booth_id'];
 
         if ($user != $_SESSION['user_id'])
         {
@@ -119,8 +122,9 @@ class Dashboard extends CI_Controller
                     'extension' => $extension,
                     'size' => $size,
                     'file_path' => $file_path,
-                    'presentation_id' => $presentation_id,
+                    'booth_id' => $booth_id,
                     'presenter_id' => $user,
+                    'company_id' => $company_id,
                     "uploaded_date_time" => date("Y-m-d H:i:s")
                 );
                 $this->db->insert("uploads", $upload);
@@ -129,7 +133,7 @@ class Dashboard extends CI_Controller
                 {
                     $file_id = $this->db->insert_id();
 
-                    $this->Presenter_Logger->log("Uploaded", $presentation_id, $file_id);
+                    $this->Presenter_Logger->log("Uploaded", $booth_id, $file_id);
 
                     echo json_encode(array('status'=>'success', 'fileId'=>$file_id, 'msg'=>'File is uploaded'));
                     return;
@@ -168,8 +172,8 @@ class Dashboard extends CI_Controller
 
         $user = $this->input->post()['user_id'];
         $file_id = $this->input->post()['file_id'];
-        $presentation_id = $this->input->post()['presentation_id'];
-
+        $booth_id = $this->input->post()['booth_id'];
+        $company_id = $this->input->post()['company_id'];
         if ($user != $logged_in_user)
         {
             echo json_encode(array('status'=>'error', 'msg'=>'You are not authorized to delete this file'));
@@ -178,13 +182,14 @@ class Dashboard extends CI_Controller
 
         $this->db->set('deleted', 1);
         $this->db->set('deleted_date_time', date("Y-m-d H:i:s"));
-        $this->db->where('presenter_id', $user);
+        $this->db->where('booth_id', $booth_id);
+        $this->db->where('company_id', $company_id);
         $this->db->where('id', $file_id);
         $this->db->update('uploads');
 
         if ($this->db->affected_rows() > 0)
         {
-            $this->Presenter_Logger->log("Deleted", $presentation_id, $file_id);
+            $this->Presenter_Logger->log("Deleted", $booth_id, $file_id);
 
             echo json_encode(array('status'=>'success', 'fileId'=>$file_id, 'msg'=>'File deleted'));
 
@@ -195,12 +200,13 @@ class Dashboard extends CI_Controller
         return;
     }
 
-    public function getUploadedFiles($user_id, $presentation_id)
+    public function getUploadedFiles($user_id, $booth_id, $company_id)
     {
         $this->db->select('*');
         $this->db->from('uploads');
         $this->db->where('presenter_id', $user_id);
-        $this->db->where('presentation_id', $presentation_id);
+        $this->db->where('booth_id', $booth_id);
+        $this->db->where('company_id', $company_id);
         $this->db->where('deleted', 0);
 
         $result = $this->db->get();
@@ -215,11 +221,11 @@ class Dashboard extends CI_Controller
         return;
     }
 
-    private function checkUploadStatus($presentation_id)
+    private function checkUploadStatus($booth_id)
     {
         $this->db->select('*');
         $this->db->from('uploads');
-        $this->db->where('presentation_id', $presentation_id);
+        $this->db->where('booth_id', $booth_id);
         $this->db->where('deleted', 0);
 
         $result = $this->db->get();

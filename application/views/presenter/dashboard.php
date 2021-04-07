@@ -60,13 +60,13 @@
                 <thead>
                 <tr>
                     <th>Status</th>
-                    <th>Category</th>
-                    <th>Presentation Title</th>
+                    <th>Company</th>
+                    <th>Booth Style</th>
                     <th>Actions</th>
                 </tr>
                 </thead>
 
-                <tbody id="presentationTableBody">
+                <tbody id="presenterBoothTableBody">
                 <!-- Will be filled by JQuery AJAX -->
                 </tbody>
 
@@ -86,7 +86,7 @@
 <script>
     $(document).ready(function() {
 
-        loadPresentations();
+        loadBooth();
 
         $('#example-upload-btn').on('click', function () {
             toastr.warning('You need to click one of the similar buttons listed below to upload files.');
@@ -96,24 +96,26 @@
             $('#changePasswordModal').modal('show');
         });
 
-        $('#presentationTable').on('click', '.upload-btn', function () {
+        $('#presenterBoothTableBody').on('click', '.upload-btn', function () {
 
             let user_id = $(this).attr('user-id');
-            let presentation_id = $(this).attr('presentation-id');
-            let presentation_name = $(this).attr('presentation-name');
-            let session_name = $(this).attr('session-name');
+            let company_id = $(this).attr('company-id');
+            let booth_id = $(this).attr('booth-id');
+            let company_name = $(this).attr('company-name');
+            let booth_style = $(this).attr('booth-style');
 
-            showUploader(user_id, presentation_id, session_name, presentation_name);
+            showUploader(user_id, company_id, booth_id, company_name, booth_style);
         });
 
-        $('#presentationTable').on('click', '.details-btn', function () {
+        $('#presenterBoothTableBody').on('click', '.details-btn', function () {
 
             let user_id = $(this).attr('user-id');
-            let presentation_id = $(this).attr('presentation-id');
-            let presentation_name = $(this).attr('presentation-name');
-            let session_name = $(this).attr('session-name');
+            let company_id = $(this).attr('company-id');
+            let booth_id = $(this).attr('booth-id');
+            let company_name = $(this).attr('company-name');
+            let booth_style = $(this).attr('booth-style');
 
-            showUploader(user_id, presentation_id, session_name, presentation_name);
+            showUploader(user_id, company_id, booth_id, company_name, booth_style);
         });
 
 
@@ -121,30 +123,30 @@
 
 
 
-    function loadPresentations() {
-        $.get( "<?=base_url('dashboard/getPresentationList')?>", function(response) {
+    function loadBooth() {
+        $.get( "<?=base_url('dashboard/getPresentersBooth')?>", function(response) {
             response = JSON.parse(response);
-
-            if ( $.fn.DataTable.isDataTable('#presentationTable') ) {
-                $('#presentationTable').DataTable().destroy();
+            console.log(response);
+            if ( $.fn.DataTable.isDataTable('#presenteBoothTable') ) {
+                $('#presenteBoothTable').DataTable().destroy();
             }
 
             $('#tblRemittanceList tbody').empty();
 
-            $('#presentationTableBody').html('');
-            $.each(response.data, function(i, presentation) {
+            $('#presenterBoothTableBody').html('');
+            $.each(response.data, function(i, booth) {
 
-                let statusBadge = (presentation.uploadStatus)?'<span class="badge badge-success"><i class="fas fa-check-circle"></i> '+presentation.uploadStatus+' File(s) uploaded</span>':'<span class="badge badge-warning"><i class="fas fa-exclamation-circle"></i> No Uploads</span>';
-                let uploadBtn = '<button class="upload-btn btn btn-sm btn-info" session-name="'+presentation.session_name+'" presentation-name="'+presentation.name+'" user-id="<?=$this->session->userdata('user_id')?>" presentation-id="'+presentation.id+'"><i class="fas fa-upload"></i> Upload</button>';
-                let detailsBtn = '<button class="details-btn btn btn-sm btn-primary text-white" session-name="'+presentation.session_name+'" presentation-name="'+presentation.name+'" user-id="<?=$this->session->userdata('user_id')?>" presentation-id="'+presentation.id+'"><i class="fas fa-info-circle"></i> Details</button>';
+                let statusBadge = (booth.uploadStatus)?'<span class="badge badge-success"><i class="fas fa-check-circle"></i> '+booth.uploadStatus+' File(s) uploaded</span>':'<span class="badge badge-warning"><i class="fas fa-exclamation-circle"></i> No Uploads</span>';
+                let uploadBtn = '<button class="upload-btn btn btn-sm btn-info" booth-id="'+booth.id+'" company-id="'+booth.company_id+'" company-name="'+booth.name+'" booth-style="'+booth.style+'" user-id="<?=$this->session->userdata('user_id')?>"><i class="fas fa-upload"></i> Upload</button>';
+                let detailsBtn = '<button class="details-btn btn btn-sm btn-primary text-white" company-name="'+booth.name+'"  company-id="'+booth.company_id+'" booth-id="'+booth.id+'"  booth-style="'+booth.style+'"  user-id="<?=$this->session->userdata('user_id')?>" presentation-id="'+booth.id+'"><i class="fas fa-info-circle"></i> Details</button>';
 
-                $('#presentationTableBody').append('' +
+                $('#presenterBoothTableBody').append('' +
                     '<tr>\n' +
                     '  <td>\n' +
                     '    '+statusBadge+'\n' +
                     '  </td>\n' +
-                    '  <td>'+presentation.session_name+'</td>\n' +
-                    '  <td>'+presentation.name+'</td>\n' +
+                    '  <td>'+booth.name+'</td>\n' +
+                    '  <td>'+booth.style+'</td>\n' +
                     '  <td>\n' +
                     '    '+uploadBtn+'\n' +
                     '    '+detailsBtn+'\n' +
@@ -152,7 +154,7 @@
                     '</tr>');
             });
 
-            $('#presentationTable').DataTable({
+            $('#presenteBoothTable').DataTable({
                 searching: false,
                 initComplete: function() {
                     $(this.api().table().container()).find('input').attr('autocomplete', 'off');

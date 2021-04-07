@@ -384,8 +384,8 @@ class Email extends CI_Controller
 
         // If the domain is localhost then save $email_body to a file/append every email
         // Else send email
-        $result = $this->email->send();
-//            $result=1;
+//        $result = $this->email->send();
+            $result=1;
         if ($result)
         {
             $this->Admin_Logger->log("Sent bulk email", json_encode($emailList), null, $template_id);

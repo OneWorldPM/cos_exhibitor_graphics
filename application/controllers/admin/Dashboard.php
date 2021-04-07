@@ -22,21 +22,21 @@ class Dashboard extends CI_Controller
 
         $this->load->view('admin/models/change-password');
         $this->load->view('admin/models/files');
-        $this->load->view('admin/models/load-presentations');
+        $this->load->view('admin/models/load-graphics');
 
         $this->load->view('admin/foot');
     }
 
-    public function getPresentationList()
+    public function getPresentersBooth()
     {
 
-        $this->db->select("p.*, s.name as session_name, pr.presenter_id, CONCAT(pr.first_name, ' ', pr.last_name) as presenter_name");
-        $this->db->from('presentations p');
-        $this->db->join('sessions s', 's.id = p.session_id');
-        $this->db->join('presenter pr', 'pr.presenter_id = p.presenter_id');
-        $this->db->order_by('p.created_on', 'DESC');
+        $this->db->select("b.*, c.name,p.first_name,p.last_name,p.email, p.name_prefix, p.presenter_id");
+        $this->db->from('booth b');
+        $this->db->join('companies c', 'c.id=b.company_id');
+        $this->db->join('presenter p', 'c.contact_person_id=p.presenter_id');
+//        $this->db->order_by('b.created_on', 'DESC');
         $result = $this->db->get();
-
+//        print_r($result->result());exit;
         if ($result->num_rows() > 0)
         {
             foreach ($result->result() as $row)
@@ -45,17 +45,18 @@ class Dashboard extends CI_Controller
             echo json_encode(array('status'=>'success', 'data'=>$result->result()));
             return;
         } else {
-            echo json_encode(array('status'=>'error', 'msg'=>'Unable to load your presentations data'));
+            echo json_encode(array('status'=>'error', 'msg'=>'Unable to load your presenter booth data'));
             return;
         }
     }
 
-    public function getUploadedFiles($user_id, $presentation_id)
+    public function getUploadedFiles($presenter_id, $booth_id, $company_id)
     {
         $this->db->select('*');
         $this->db->from('uploads');
-        $this->db->where('presenter_id', $user_id);
-        $this->db->where('presentation_id', $presentation_id);
+        $this->db->where('presenter_id', $presenter_id);
+        $this->db->where('company_id', $company_id);
+        $this->db->where('booth_id', $booth_id);
         $this->db->where('deleted', 0);
 
         $result = $this->db->get();
@@ -70,11 +71,11 @@ class Dashboard extends CI_Controller
         return;
     }
 
-    private function checkUploadStatus($presentation_id)
+    private function checkUploadStatus($booth_id)
     {
         $this->db->select('*');
         $this->db->from('uploads');
-        $this->db->where('presentation_id', $presentation_id);
+        $this->db->where('booth_id', $booth_id);
         $this->db->where('deleted', 0);
 
         $result = $this->db->get();
@@ -120,15 +121,16 @@ class Dashboard extends CI_Controller
         return;
     }
 
-    public function activatePresentation($presentation_id)
+    public function activatePresentation($booth_id, $company_id, $presenter_id)
     {
         $this->db->set('active', 1);
-        $this->db->where('id', $presentation_id);
-        $this->db->update('presentations');
+        $this->db->where('company_id', $company_id);
+        $this->db->where('id', $booth_id);
+        $this->db->update('booth');
 
         if ($this->db->affected_rows() > 0)
         {
-            $this->Admin_Logger->log("Activated", null, $presentation_id);
+            $this->Admin_Logger->log("Activated", null, $booth_id);
 
             echo json_encode(array('status'=>'success', 'msg'=>'Presentation activated'));
 
@@ -137,15 +139,16 @@ class Dashboard extends CI_Controller
         }
     }
 
-    public function disablePresentation($presentation_id)
+    public function disablePresentation($booth_id, $company_id, $presenter_id)
     {
         $this->db->set('active', 0);
-        $this->db->where('id', $presentation_id);
-        $this->db->update('presentations');
+        $this->db->where('company_id', $company_id);
+        $this->db->where('id', $booth_id);
+        $this->db->update('booth');
 
         if ($this->db->affected_rows() > 0)
         {
-            $this->Admin_Logger->log("Disabled", null, $presentation_id);
+            $this->Admin_Logger->log("Disabled", null, $booth_id);
 
             echo json_encode(array('status'=>'success', 'msg'=>'Presentation disabled'));
 
@@ -154,38 +157,34 @@ class Dashboard extends CI_Controller
         }
     }
 
-    public function loadPresentations()
+    public function loadPresenterBooths()
     {
 
         $allowed_column_names = array(
-            'A'=>'Abstract.ControlNumber',
-            'B'=>'Topic.Topic1',
-            'C'=>'ePoster.Title',
-            'D'=>'Author.FirstName',
-            'E'=>'Author.LastName',
-            'F'=>'Author.Salutation',
-            'G'=>'Author.Email',
-            'H'=>'Primary author',
-            'I'=>'co-authors',
-            'J'=>'AWARD'
+            'A'=>'Salutation',
+            'B'=>'Email',
+            'C'=>'FirstName',
+            'D'=>'LastName',
+            'E'=>'Primary Contact',
+            'F'=>'Company',
+            'G'=>'Booth Style',
         );
 
         $required_column_names = array(
-            'B'=>'Topic.Topic1',
-            'C'=>'ePoster.Title',
-            'D'=>'Author.FirstName',
-            'E'=>'Author.LastName',
-            'G'=>'Author.Email'
+            'B'=>'Email',
+            'C'=>'FirstName',
+            'F'=>'Company',
+            'G'=>'Booth Style',
         );
 
         $param_column_index = array(
-            'email'=>'G',
-            'name_prefix'=>'F',
-            'first_name'=>'D',
-            'last_name'=>'E',
-            'session_name'=>'B',
-            'presentation_name'=>'C',
-            'award'=>'J'
+            'name_prefix'=>'A',
+            'email'=>'B',
+            'first_name'=>'C',
+            'last_name'=>'D',
+            'primary_contact'=>'E',
+            'company'=>'F',
+            'booth_style'=>'G'
         );
 
         $admin_id = $_SESSION['user_id'];
@@ -257,28 +256,21 @@ class Dashboard extends CI_Controller
                 }
             }
 
-            $name_prefix = (isset($row_columns['F']))?str_replace('\'', "\`", $row_columns[$param_column_index['name_prefix']]):'';
+            $name_prefix = (isset($row_columns['A']))?str_replace('\'', "\`", $row_columns[$param_column_index['name_prefix']]):'';
             $first_name = str_replace('\'', "\`", $row_columns[$param_column_index['first_name']]);
             $last_name = str_replace('\'', "\`", $row_columns[$param_column_index['last_name']]);
             $email = str_replace('\'', "\`", $row_columns[$param_column_index['email']]);
             $password = str_replace('\'', "\`", $first_name);
-            $session_name = str_replace('\'', "\`", $row_columns[$param_column_index['session_name']]);
-            $presentation_name = str_replace('\'', "\`", $row_columns[$param_column_index['presentation_name']]);
+            $company = str_replace('\'', "\`", $row_columns[$param_column_index['company']]);
+            $booth_style = str_replace('\'', "\`", $row_columns[$param_column_index['booth_style']]);
             $created_date_time = date("Y-m-d H:i:s");
 
-            $award = 'null';
-            if (isset($row_columns[$param_column_index['award']]))
-            {
-                $award = ucfirst(str_replace('\'', "\`", $row_columns[$param_column_index['award']]));
-                $award = ($award == '')?'null':"'{$award}'";
-            }
-
-            $exists = $this->checkDuplicate($email, $session_name, $presentation_name);
+            $exists = $this->checkDuplicate($company, $booth_style);
 
             if ($exists)
             {
                 $desc = json_encode($exists);
-                $this->db->query("INSERT INTO `admin_logs`(`admin_id`, `log_name`, `log_desc`, `ref_presentation_id`, `other_ref`, `date_time`) VALUES ( '{$admin_id}', 'Ignored load item', '{$desc}', '{$exists->presentation_id}', '{$exists->presenter_id}', '{$created_date_time}')");
+                $this->db->query("INSERT INTO `admin_logs`(`admin_id`, `log_name`, `log_desc`, `ref_company_id`, `other_ref`, `date_time`) VALUES ( '{$admin_id}', 'Ignored load item', '{$desc}', '{$exists->company_id}', null, '{$created_date_time}')");
                 $duplicateRows = $duplicateRows+1;
 
             }else{
@@ -291,29 +283,29 @@ class Dashboard extends CI_Controller
                     }else{
                         $this->db->query("INSERT INTO `presenter`(`name_prefix`, `first_name`, `last_name`, `email`, `password`, `creation_date`) VALUES ('{$name_prefix}', '{$first_name}','{$last_name}','{$email}','{$password}','{$created_date_time}')");
                         $presenter_id = $this->db->insert_id();
-                        $this->db->query("INSERT INTO `admin_logs`(`admin_id`, `log_name`, `log_desc`, `ref_presentation_id`, `other_ref`, `date_time`) VALUES ( '{$admin_id}', 'Created user', null, null, '{$presenter_id}', '{$created_date_time}')");
+                        $this->db->query("INSERT INTO `admin_logs`(`admin_id`, `log_name`, `log_desc`, `ref_company_id`, `other_ref`, `date_time`) VALUES ( '{$admin_id}', 'Created user', null, null, '{$presenter_id}', '{$created_date_time}')");
                     }
 
-                    $sessionExists = $this->checkSessionExists($session_name);
-                    if ($sessionExists)
+                    $company_exist = $this->checkCompanyExist($company);
+                    if ($company_exist)
                     {
-                        $session_id = $sessionExists;
+                        $company_id = $company_exist;
+
                     }else{
-                        $this->db->query("INSERT INTO `sessions`(`name`) VALUES ('{$session_name}')");
-                        $session_id = $this->db->insert_id();
-                        $this->db->query("INSERT INTO `admin_logs`(`admin_id`, `log_name`, `log_desc`, `ref_presentation_id`, `other_ref`, `date_time`) VALUES ( '{$admin_id}', 'Created session', null, null, '{$session_id}', '{$created_date_time}')");
+                        $this->db->query("INSERT INTO `companies`(`name`, `contact_person_id`) VALUES ('{$company}','{$presenter_id}')");
+                        $company_id = $this->db->insert_id();
+                        $this->db->query("INSERT INTO `admin_logs`(`admin_id`, `log_name`, `log_desc`, `ref_company_id`, `other_ref`, `date_time`) VALUES ( '{$admin_id}', 'Created company', null, '{$company_id}', null, '{$created_date_time}')");
                     }
 
-                    $presentationExists = $this->checkPresentationExists($presentation_name, $session_id, $presenter_id);
-                    if ($presentationExists)
-                    {
-                        $desc = json_encode($presentationExists);
-                        $this->db->query("INSERT INTO `admin_logs`(`admin_id`, `log_name`, `log_desc`, `ref_presentation_id`, `other_ref`, `date_time`) VALUES ( '{$admin_id}', 'Ignored load item', '{$desc}', '{$presentationExists->id}', '{$presentationExists->presenter_id}', '{$created_date_time}')");
+                    $presenter_booth_exist = $this->presenter_booth_exist($booth_style, $company_id);
+                    if($presenter_booth_exist){
+                        $desc = json_encode($presenter_booth_exist);
+                        $this->db->query("INSERT INTO `admin_logs`(`admin_id`, `log_name`, `log_desc`, `ref_company_id`, `other_ref`, `date_time`) VALUES ( '{$admin_id}', 'Ignored load item', '{$desc}', '{$presenter_booth_exist->company_id}', '{$presenter_booth_exist->id}', '{$created_date_time}')");
                         $duplicateRows = $duplicateRows+1;
                     }else{
-                        $this->db->query("INSERT INTO `presentations`(`name`, `session_id`, `presenter_id`, `created_on`,`award`) VALUES ('{$presentation_name}','{$session_id}','{$presenter_id}','{$created_date_time}',".$award.")");
-                        $presentation_id = $this->db->insert_id();
-                        $this->db->query("INSERT INTO `admin_logs`(`admin_id`, `log_name`, `log_desc`, `ref_presentation_id`, `other_ref`, `date_time`) VALUES ( '{$admin_id}', 'Created presentation', null, '{$presentation_id}', null, '{$created_date_time}')");
+                        $this->db->query("INSERT INTO `booth`(`company_id`, `style`, `created_on`) VALUES ('{$company_id}','{$booth_style}','{$created_date_time}')");
+                        $booth_id = $this->db->insert_id();
+                        $this->db->query("INSERT INTO `admin_logs`(`admin_id`, `log_name`, `log_desc`, `ref_company_id`, `other_ref`, `date_time`) VALUES ( '{$admin_id}', 'Created booth', null, '{$company_id}', '{$booth_id}', '{$created_date_time}')");
                         $createdPresentations = $createdPresentations+1;
                     }
 
@@ -349,15 +341,13 @@ class Dashboard extends CI_Controller
         return;
     }
 
-    private function checkDuplicate($email, $session_name, $presentation_name)
+    private function checkDuplicate($company, $booth_style)
     {
-        $this->db->select('p.presenter_id, pr.id as presentation_id, s.id as session_id')
-            ->from('presentations pr')
-            ->join('presenter p', "p.presenter_id = pr.presenter_id")
-            ->join('sessions s', "s.id = pr.session_id")
-            ->where('p.email', "$email")
-            ->where('s.name', "$session_name")
-            ->where('pr.name', "$presentation_name");
+        $this->db->select('c.id as company_id, b.id as booth_id')
+            ->from('booth b')
+            ->join('companies c', "c.id = b.company_id")
+            ->where('c.name', $company)
+            ->where('b.style', $booth_style);
 
         $result = $this->db->get();
 
@@ -371,7 +361,7 @@ class Dashboard extends CI_Controller
     {
         $this->db->select('presenter_id')
             ->from('presenter')
-            ->where('email', "$email");
+            ->where('email', $email);
 
         $result = $this->db->get();
 
@@ -381,11 +371,10 @@ class Dashboard extends CI_Controller
         return false;
     }
 
-    private function checkSessionExists($session_name)
-    {
+    private function checkCompanyExist($company){
         $this->db->select('id')
-            ->from('sessions')
-            ->where('name', "$session_name");
+            ->from('companies')
+            ->where('name', $company);
 
         $result = $this->db->get();
 
@@ -395,9 +384,9 @@ class Dashboard extends CI_Controller
         return false;
     }
 
-    private function checkPresentationExists($presentation_name, $session_id, $presenter_id)
+    private function presenter_booth_exist($booth_style, $company_id)
     {
-        $query = $this->db->query("select id, name, session_id, presenter_id from presentations where name='{$presentation_name}' and session_id='{$session_id}' and presenter_id='{$presenter_id}'");
+        $query = $this->db->query("select * from booth where style='{$booth_style}' and company_id='{$company_id}'");
 
         if ($query->num_rows() > 0)
             return $query->result_object()[0];

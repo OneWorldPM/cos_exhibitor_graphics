@@ -99,12 +99,12 @@
     });
 
 
-    function showUploader(user_id, presentation_id, session_name, presentation_name)
+    function showUploader(user_id, booth_id, company_id)
     {
-        fillUploadedFiles(user_id, presentation_id);
+        fillUploadedFiles(user_id, booth_id, company_id);
 
-        $('#sessionName').text(session_name);
-        $('#presentationName').text(presentation_name);
+        // $('#sessionName').text(session_name);
+        // $('#presentationName').text(presentation_name);
 
         let form = '' +
             '<form method="post" class="dropzone">' +
@@ -130,7 +130,8 @@
 
         uploadDropzone.on('sending', function(file, xhr, formData){
             formData.append('user_id', user_id);
-            formData.append('presentation_id', presentation_id);
+            formData.append('booth_id', booth_id);
+            formData.append('company_id', company_id);
         });
 
         uploadDropzone.on('success', function() {
@@ -172,10 +173,10 @@
         });
     }
 
-    function fillUploadedFiles(user_id, presentation_id) {
+    function fillUploadedFiles(user_id, company_id, booth_id) {
         $('#uploadedFiles').html('<img src="<?=base_url('upload_system_files/vendor/images/ycl_anime_500kb.gif')?>">');
 
-        $.get( "<?=base_url('dashboard/getUploadedFiles/')?>"+user_id+"/"+presentation_id, function(response) {
+        $.get( "<?=base_url('dashboard/getUploadedFiles/')?>"+user_id+"/"+booth_id+"/"+company_id, function(response) {
             response = JSON.parse(response);
 
             if (response.status == 'success')
@@ -187,7 +188,7 @@
                         '<li class="list-group-item">' +
                         '<a href="<?=base_url('dashboard/openFile/')?>'+file.id+'" target="_blank"><button class="btn btn-sm btn-info mr-3"><i class="fas fa-save"></i> Download</button></a>' +
                         '<span class="uploaded-file-names badge badge-success"><i class="fas fa-clipboard-check"></i> '+file.name+' <span class="badge badge-info">'+Math.ceil(file.size/1000)+' kb</span></span>' +
-                        '<button class="delete-file-btn btn btn-sm btn-danger ml-3" presentation-id="'+file.presentation_id+'" user-id="'+file.presenter_id+'" file-id="'+file.id+'" file-name="'+file.name+'"><i class="fas fa-trash"></i> Delete</button>' +
+                        '<button class="delete-file-btn btn btn-sm btn-danger ml-3" presentation-id="'+file.presentation_id+'" company-id = "'+file.company_id+'" user-id="'+file.presenter_id+'" file-id="'+file.id+'" file-name="'+file.name+'"><i class="fas fa-trash"></i> Delete</button>' +
                         '</li>');
                 });
                 $('#uploadedFiles').append('</ul>');

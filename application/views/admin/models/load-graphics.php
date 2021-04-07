@@ -86,7 +86,7 @@
                     let formData = new FormData();
                     formData.append('file', $('#inputPresentationsFile')[0].files[0]);
                     $.ajax({
-                        url: "<?=base_url('admin/dashboard/loadPresentations')?>",
+                        url: "<?=base_url('admin/dashboard/loadPresenterBooths')?>",
                         type: "POST",
                         data:  formData,
                         contentType: false,
