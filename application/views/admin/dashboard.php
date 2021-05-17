@@ -17,7 +17,7 @@
 
         <div class="col-md-12">
             <button class="create-presentation-btn btn btn-success float-right"><i class="fas fa-plus"></i> Create</button>
-            <table id="presentationTable" class="table table-striped table-bordered" style="width:100%">
+            <table id="presenterBoothTable" class="table table-striped table-bordered" style="width:100%">
                 <thead>
                 <tr>
                     <th>Status</th>
@@ -117,7 +117,7 @@
     function loadPresenterBooths() {
         $.get( "<?=base_url('admin/dashboard/getPresentersBooth')?>", function(response) {
             response = JSON.parse(response);
-            console.log(response);
+
             if ( $.fn.DataTable.isDataTable('#presenterBoothTable') ) {
                 $('#presenterBoothTable').DataTable().destroy();
             }
