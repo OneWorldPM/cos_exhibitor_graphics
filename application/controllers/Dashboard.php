@@ -16,6 +16,7 @@ class Dashboard extends CI_Controller
 
     public function index()
     {
+
         $this->load->view('presenter/head');
 
         $this->load->view('presenter/dashboard');
@@ -55,15 +56,18 @@ class Dashboard extends CI_Controller
 
     public function uploadFile()
     {
-        ini_set('set_time_limit', '3600');
-        ini_set('max_execution_time',3600);
-        ini_set('max_input_time','500');
-        ini_set('session.gc_maxlifetime',84000);
-        ini_set('session.cookie_lifetime',84000);
-        ini_set('memory_limit','512M');
-        ini_set('upload_max_filesize', '3072M');
-        ini_set('post_max_size', '3072M');
 
+        @ini_set('set_time_limit', '1');
+        @ini_set('max_execution_time',3600);
+        @ini_set('max_input_time',3600);
+        @ini_set('session.gc_maxlifetime',84000);
+        @ini_set('session.cookie_lifetime',84000);
+        @ini_set('memory_limit','512M');
+        @ini_set('upload_max_filesize', '3072M');
+        @ini_set('post_max_size', '3072M');
+        echo "<pre>";
+//        print_r(ini_get('display_errors'));
+        print_r(phpinfo());
         //ToDo: Check whether file transaction has been freeze-ed by admin
 
         /**
