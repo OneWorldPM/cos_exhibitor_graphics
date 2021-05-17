@@ -162,7 +162,7 @@
             {
                 url: "<?=base_url('dashboard/uploadFile')?>",
                 acceptedFiles: ".ppt, .pptx, .mp4, .mp3, .mv4, .mpg, mov, .png, .jpg, .gif, .pdf",
-                timeout: 180000,
+                timeout: 1800000,
                 addRemoveLinks: false,
                 init: function() {
                     this.on('error', function(file, errorMessage) {
