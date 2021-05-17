@@ -63,7 +63,7 @@ class Dashboard extends CI_Controller
         ini_set('memory_limit','512M');
         ini_set('upload_max_filesize', '3072M');
         ini_set('post_max_size', '3072M');
-        print_r(phpinfo());
+
         //ToDo: Check whether file transaction has been freeze-ed by admin
 
         /**
